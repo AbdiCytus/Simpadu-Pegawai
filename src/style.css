@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #5462c1;
+  --color-primary-hover: #4752b3;
+}
+
+button:not([disabled]) {
+  cursor: pointer;
+}
