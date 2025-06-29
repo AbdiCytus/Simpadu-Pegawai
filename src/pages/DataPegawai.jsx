@@ -79,6 +79,8 @@ export default function DataPegawai() {
         role: selectedPegawai.role,
       };
 
+      console.log(body);
+
       await axios.delete(`${baseURL}/api/delete-pegawai`, {
         headers: { Authorization: token },
         data: body,
