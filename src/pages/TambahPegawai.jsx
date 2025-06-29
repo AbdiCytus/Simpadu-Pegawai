@@ -2,8 +2,195 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import { FaEye } from "react-icons/fa";
-import ScheduleModal from "../components/Modals/ScheduleModal";
+import { FaEye, FaEyeSlash, FaPlus, FaTrash } from "react-icons/fa";
+
+// --- Komponen Modal untuk Menambah Jadwal Mengajar ---
+const ScheduleModal = ({
+  isOpen,
+  onClose,
+  schedules,
+  setSchedules,
+  kelasOptions,
+  matkulOptions,
+}) => {
+  const [isShowing, setIsShowing] = useState(false);
+  const [currentSchedule, setCurrentSchedule] = useState({
+    id_mk: "",
+    id_kelas: "",
+    hari: "",
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => setIsShowing(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      setIsShowing(false);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsShowing(false);
+    setTimeout(onClose, 300);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentSchedule((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
+
+  const handleAddSchedule = () => {
+    if (
+      !currentSchedule.id_mk ||
+      !currentSchedule.id_kelas ||
+      !currentSchedule.hari
+    ) {
+      setError("Semua field jadwal wajib diisi.");
+      return;
+    }
+    if (schedules.filter((s) => s.hari === currentSchedule.hari).length >= 3) {
+      setError(
+        `Tidak bisa menambah lebih dari 3 kelas di hari ${currentSchedule.hari}.`
+      );
+      return;
+    }
+    if (schedules.some((s) => s.id_kelas === currentSchedule.id_kelas)) {
+      setError(`Kelas ini sudah memiliki jadwal mengajar.`);
+      return;
+    }
+    setSchedules((prev) => [...prev, currentSchedule]);
+    setCurrentSchedule({ id_mk: "", id_kelas: "", hari: "" });
+    setError("");
+  };
+
+  const handleRemoveSchedule = (indexToRemove) => {
+    setSchedules((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm flex justify-center items-start pt-20 z-50 p-4">
+      <div
+        className={`bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl transform transition-all duration-300 ease-out ${
+          isShowing ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
+        }`}
+      >
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          Tambah Jadwal Mengajar
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end border-b pb-4">
+          <div className="md:col-span-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Mata Kuliah
+            </label>
+            <select
+              name="id_mk"
+              value={currentSchedule.id_mk}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Pilih Matkul</option>
+              {matkulOptions.map((mk) => (
+                <option key={mk.id_mk} value={mk.id_mk}>
+                  {mk.nama_mk}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Kelas
+            </label>
+            <select
+              name="id_kelas"
+              value={currentSchedule.id_kelas}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Pilih Kelas</option>
+              {kelasOptions.map((k) => (
+                <option key={k.id_kelas} value={k.id_kelas}>
+                  {k.nama_kelas}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Hari
+            </label>
+            <select
+              name="hari"
+              value={currentSchedule.hari}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Pilih Hari</option>
+              <option>Senin</option>
+              <option>Selasa</option>
+              <option>Rabu</option>
+              <option>Kamis</option>
+              <option>Jumat</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddSchedule}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 h-10 text-sm"
+          >
+            Tambah
+          </button>
+        </div>
+        {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+        <div className="mt-4">
+          <h4 className="font-semibold text-sm">
+            Jadwal Ditambahkan: {schedules.length > 0 ? "" : " (Kosong)"}
+          </h4>
+          <ul className="mt-2 space-y-2 max-h-40 overflow-y-auto text-sm">
+            {schedules.map((schedule, index) => (
+              <li
+                key={index}
+                className="flex justify-between items-center bg-gray-100 p-2 rounded-md"
+              >
+                <span>
+                  {
+                    matkulOptions.find((m) => m.id_mk === schedule.id_mk)
+                      ?.nama_mk
+                  }{" "}
+                  -{" "}
+                  {
+                    kelasOptions.find((k) => k.id_kelas === schedule.id_kelas)
+                      ?.nama_kelas
+                  }{" "}
+                  ({schedule.hari})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSchedule(index)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-4 py-2 bg-green-600 text-white rounded-md font-semibold text-sm"
+          >
+            Selesai & Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function TambahPegawai() {
   const navigate = useNavigate();
@@ -19,7 +206,13 @@ export default function TambahPegawai() {
     jenis_kelamin: "Laki-laki",
     no_telp: "",
   });
-  const [tempProdi, setTempProdi] = useState(1);
+
+  const [jurusanOptions, setJurusanOptions] = useState([]);
+  const [prodiOptions, setProdiOptions] = useState([]);
+  const [filteredProdiOptions, setFilteredProdiOptions] = useState([]);
+  const [selectedJurusan, setSelectedJurusan] = useState(1);
+  const [selectedProdi, setSelectedProdi] = useState(1);
+
   const [schedules, setSchedules] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,37 +220,58 @@ export default function TambahPegawai() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [kelasOptions, setKelasOptions] = useState([]);
   const [matkulOptions, setMatkulOptions] = useState([]);
-  const [prodiOptions, setProdiOptions] = useState([]);
 
   useEffect(() => {
-    const fetchKelasMatkulData = async () => {
+    const fetchDataForDosen = async () => {
       if (formData.role !== "Dosen" || !token) return;
       try {
-        const response = await axios.get(`${baseURL}/api/data/kelas-matkul`, {
-          headers: { Authorization: token },
-        });
-        const response_2 = await axios.get(`${baseURL}/api/data/prodi`, {
-          headers: { Authorization: token },
-        });
-        setKelasOptions(response.data.dataKelas);
-        setMatkulOptions(response.data.dataMatkul);
-        setProdiOptions(response_2.data.dataProdi);
+        const [kelasMatkulRes, prodiRes, jurusanRes] = await Promise.all([
+          axios.get(`${baseURL}/api/data/kelas-matkul`, {
+            headers: { Authorization: token },
+          }),
+          axios.get(`${baseURL}/api/data/prodi`),
+          axios.get(`${baseURL}/api/data/jurusan`, {
+            headers: { Authorization: token },
+          }),
+        ]);
+
+        setKelasOptions(kelasMatkulRes.data.dataKelas);
+        setMatkulOptions(kelasMatkulRes.data.dataMatkul);
+
+        const fetchedJurusan = jurusanRes.data.dataJurusan;
+        const fetchedProdi = prodiRes.data.data;
+
+        setJurusanOptions(fetchedJurusan);
+        setProdiOptions(fetchedProdi);
+
+        if (fetchedJurusan.length > 0) {
+          setSelectedJurusan(fetchedJurusan[0].id_jurusan);
+        }
       } catch (error) {
-        console.error("Gagal mengambil data kelas & matkul:", error);
+        console.error("Gagal mengambil data untuk dosen:", error);
       }
     };
-    fetchKelasMatkulData();
-  }, [formData.role, token]);
+    fetchDataForDosen();
+  }, [formData.role, token, baseURL]);
+
+  useEffect(() => {
+    if (selectedJurusan) {
+      const filtered = prodiOptions.filter(
+        (p) => p.id_jurusan === selectedJurusan
+      );
+      setFilteredProdiOptions(filtered);
+      if (filtered.length > 0) {
+        setSelectedProdi(filtered[0].id_prodi);
+      } else {
+        setSelectedProdi("");
+      }
+    }
+  }, [selectedJurusan, prodiOptions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
-  };
-
-  const handleProdiChange = (e) => {
-    const convertToNumber = Number(e.target.value);
-    setTempProdi(convertToNumber);
   };
 
   const validateForm = () => {
@@ -68,7 +282,6 @@ export default function TambahPegawai() {
     if (!formData.password) newErrors.password = "Password wajib diisi.";
     if (formData.role === "Dosen" && schedules.length === 0)
       newErrors.schedules = "Dosen wajib memiliki minimal 1 jadwal mengajar.";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -93,12 +306,15 @@ export default function TambahPegawai() {
 
     if (formData.role === "Dosen") {
       requestBody.schedule = schedules.map((s) => ({
-        id_prodi: tempProdi,
+        id_jurusan: selectedJurusan,
+        id_prodi: selectedProdi,
         id_mk: s.id_mk,
         id_kelas: s.id_kelas,
         hari: s.hari,
       }));
     }
+
+    console.log(requestBody);
 
     try {
       await axios.post(`${baseURL}/api/data/tambah-pegawai`, requestBody, {
@@ -107,7 +323,6 @@ export default function TambahPegawai() {
       alert("Berhasil menambah data pegawai baru!");
       navigate("/data-pegawai");
     } catch (error) {
-      console.log(requestBody);
       console.error("Gagal menambah pegawai:", error.response?.data);
       alert(
         error.response?.data?.message || "Terjadi kesalahan saat menambah data."
@@ -233,20 +448,40 @@ export default function TambahPegawai() {
 
               {formData.role === "Dosen" && (
                 <>
-                  <select
-                    name=""
-                    value={tempProdi}
-                    onChange={handleProdiChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    {prodiOptions.map((p, i) => {
-                      return (
-                        <option key={i} value={p.id_prodi}>
-                          {p.nama_prodi}
+                  {/* Kedua dropdown dibungkus dalam satu div dengan grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <select
+                      name="jurusan"
+                      value={selectedJurusan}
+                      onChange={(e) =>
+                        setSelectedJurusan(Number(e.target.value))
+                      }
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      {jurusanOptions.map((j) => (
+                        <option key={j.id_jurusan} value={j.id_jurusan}>
+                          Jurusan - {j.nama_jurusan}
                         </option>
-                      );
-                    })}
-                  </select>
+                      ))}
+                    </select>
+
+                    <select
+                      name="prodi"
+                      value={selectedProdi}
+                      onChange={(e) => setSelectedProdi(Number(e.target.value))}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      {filteredProdiOptions.length > 0 ? (
+                        filteredProdiOptions.map((p) => (
+                          <option key={p.id_prodi} value={p.id_prodi}>
+                            Prodi - {p.nama_prodi}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>Pilih Jurusan</option>
+                      )}
+                    </select>
+                  </div>
                   <div>
                     <button
                       type="button"

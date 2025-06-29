@@ -58,7 +58,8 @@ export default function Perkuliahan() {
               <Link
                 key={kelas.id}
                 to={`/perkuliahan/${kelas.id}`} // Link sekarang menggunakan id_kelas
-                className="flex flex-col sm:flex-row sm:justify-between shadow-md sm:items-center p-4 rounded-lg bg-slate-50 hover:bg-gray-100 transition-colors duration-200">
+                className="flex flex-col sm:flex-row sm:justify-between shadow-md sm:items-center p-4 rounded-lg bg-slate-50 hover:bg-gray-100 transition-colors duration-200"
+              >
                 <span className="font-semibold text-gray-800">
                   {kelas.nama}
                 </span>
