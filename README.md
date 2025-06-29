@@ -1,12 +1,15 @@
-# React + Vite
+# Simpadu Pegawai Poliban (SIMPEG)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Proyek ini dibangun menggunakan teknologi framework react dan tailwind
 
-Currently, two official plugins are available:
+Tiap user akan masuk ke akunnya masing-masing sebagai role tertentu, saat ini role yang tersedia berupa:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Staff
+- Dosen
+- Admin
 
-## Expanding the ESLint configuration
+## Fitur Tiap Role
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Staff sebagai user paling umum dan hanya memiliki sedikit fitur yang dapat diaksesnya.
+Dosen memiliki fitur yang berkaitan dengan perkuliahan.
+Admin memiliki fitur yang berkaitan dengan management data pegawai, admin di sini yang dimaksud adalah Admin Kepegawaian.
