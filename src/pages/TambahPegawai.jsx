@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import { FaEye, FaEyeSlash, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEye, FaTrash } from "react-icons/fa";
+import { PiRowsDuotone } from "react-icons/pi";
 
 // --- Komponen Modal untuk Menambah Jadwal Mengajar ---
 const ScheduleModal = ({
@@ -238,7 +239,7 @@ export default function TambahPegawai() {
         setKelasOptions(kelasMatkulRes.data.dataKelas);
         setMatkulOptions(kelasMatkulRes.data.dataMatkul);
 
-        const fetchedJurusan = jurusanRes.data.dataJurusan;
+        const fetchedJurusan = jurusanRes.data.data;
         const fetchedProdi = prodiRes.data.data;
 
         setJurusanOptions(fetchedJurusan);
